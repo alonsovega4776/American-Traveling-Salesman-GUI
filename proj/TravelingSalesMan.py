@@ -7,7 +7,7 @@ from itertools import combinations, product
 import webbrowser
 
 
-# Captials and Location
+# Get Data *************************************************************************************************************
 capitals_json = json.load(open('/Users/xXxMrMayhemxXx/Documents/GitHub/RideSharing-Autonomous-Mobility-Optimizer-/project/us_state_capitals.json'))
 capitals = []                                           # [lansing, denver, ....]
 coordinates = {}                                        # capital |--> (lat, long)
@@ -18,11 +18,11 @@ for state in capitals_json:
         coordinates[capital] = (float(capitals_json[state]['lat']), float(capitals_json[state]['long']))
 
 
-# --------------------------------------------FUNCTION------------------------------------------------------------------
+# --------------------------------------------distance------------------------------------------------------------------
 def distance(capital_1, capital_2):
     Δ = tuple(map(lambda i, j: i-j, coordinates[capital_2], coordinates[capital_1]))
     return np.linalg.norm(Δ, ord=2)
-# --------------------------------------------FUNCTION------------------------------------------------------------------
+# --------------------------------------------distance------------------------------------------------------------------
 
 
 distance_dict = {(c_1, c_2): distance(c_1, c_2)         # (capital_1, capital_2) |--> REAL NUMBERS
@@ -30,7 +30,7 @@ distance_dict = {(c_1, c_2): distance(c_1, c_2)         # (capital_1, capital_2)
                  if c_1 != c_2}                         # (c_1, c_2) in Capitals^2
 
 all_tours = []
-# --------------------------------------------FUNCTION------------------------------------------------------------------
+# --------------------------------------------subTour_eliminator--------------------------------------------------------
 def subTour_eliminator(model, where):
     if where == GRB.Callback.MIPSOL:                                                # possible solution
         values = model.cbGetSolution(model._vars)
@@ -44,10 +44,10 @@ def subTour_eliminator(model, where):
         if len(sol_tour) < len(capitals):
             model.cbLazy(guro.quicksum(model._vars[i_1, i_2]
                                        for (i_1, i_2) in combinations(sol_tour, 2)) <= len(sol_tour)-1)
-# --------------------------------------------FUNCTION------------------------------------------------------------------
+# --------------------------------------------subTour_eliminator--------------------------------------------------------
 
 
-# --------------------------------------------FUNCTION------------------------------------------------------------------
+# --------------------------------------------get_cycle-----------------------------------------------------------------
 def get_cycle(edge_list):
     unvisited = capitals[:]
     ciclo = capitals[:]
@@ -64,26 +64,28 @@ def get_cycle(edge_list):
         if len(this_cycle) <= len(ciclo):
             ciclo = this_cycle
     return ciclo
-# --------------------------------------------FUNCTION------------------------------------------------------------------
+# --------------------------------------------get_cycle-----------------------------------------------------------------
 
 
-# Model
+# Model ****************************************************************************************************************
+
 model = guro.Model()
 
-vars = model.addVars(distance_dict.keys(), obj=distance_dict, vtype=GRB.BINARY, name='e')
-for (i, j) in vars.keys():
-    model.addConstr(vars[j, i] == vars[i, j])
+des_vars = model.addVars(distance_dict.keys(), obj=distance_dict, vtype=GRB.BINARY, name='x')
 
-model.addConstrs(vars.sum(c, '*') == 2 for c in capitals)
+for (i, j) in des_vars.keys():
+    model.addConstr(des_vars[j, i] == des_vars[i, j])
 
-model._vars = vars
+model.addConstrs(des_vars.sum(c, '*') == 2 for c in capitals)
+
+model._vars = des_vars
 model.Params.lazyConstraints = 1
 model.optimize(subTour_eliminator)
 
 
+# Analysis *************************************************************************************************************
 
-# Analysis
-vals = model.getAttr('x', vars)
+vals = model.getAttr('x', des_vars)
 selected = guro.tuplelist((i, j) for i, j in vals.keys() if vals[i, j] > 0.5)
 
 tour = get_cycle(selected)
@@ -124,12 +126,14 @@ for each in points:
     count = count + 1
 
 
+# --------------------------------------------auto_open-----------------------------------------------------------------
 def auto_open(path, f_map):
     html_page = f'{path}'
     f_map.save(html_page)
-    # open in browser.
     new = 2
     webbrowser.open(html_page, new=new)
+# --------------------------------------------auto_open-----------------------------------------------------------------
+
 
 auto_open('/Users/xXxMrMayhemxXx/Desktop/map.html', map)
 
