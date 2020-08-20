@@ -157,13 +157,13 @@ points = []
 for city in tour:
     points.append(coordinates[city])
 
-folium.PolyLine(points, color="blue", weight=4.5, opacity=0.35).add_to(folium_map)
-folium.PolyLine([points[0], points[len(points)-1]], color="blue", weight=4.5, opacity=0.35).add_to(folium_map)
+folium.PolyLine(points, color="red", weight=4.5, opacity=0.80).add_to(folium_map)
+folium.PolyLine([points[0], points[len(points)-1]], color="red", weight=4.5, opacity=0.80).add_to(folium_map)
 
 # Every Possible Path
 combo = [(i, j) for (i, j) in product(locations, locations) if i != j]
 for (i, j) in combo:
-    folium.PolyLine([coordinates[i], coordinates[j]], color='black', weight=1.0, opacity=0.275).add_to(folium_map)
+    folium.PolyLine([coordinates[i], coordinates[j]], color='black', weight=1.0, opacity=0.175).add_to(folium_map)
 
 
 # --------------------------------------------auto_open-----------------------------------------------------------------
