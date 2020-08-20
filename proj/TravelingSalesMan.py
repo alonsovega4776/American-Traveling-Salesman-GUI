@@ -5,6 +5,8 @@ import json
 import folium
 from itertools import combinations, product
 import webbrowser
+import map
+
 
 
 # Get Data *************************************************************************************************************
@@ -17,12 +19,16 @@ for state in capitals_json:
         capitals.append(capital)
         coordinates[capital] = (float(capitals_json[state]['lat']), float(capitals_json[state]['long']))
 
-
 # --------------------------------------------distance------------------------------------------------------------------
 def distance(capital_1, capital_2):
     Δ = tuple(map(lambda i, j: i-j, coordinates[capital_2], coordinates[capital_1]))
     return np.linalg.norm(Δ, ord=2)
 # --------------------------------------------distance------------------------------------------------------------------
+
+
+
+
+
 
 
 distance_dict = {(c_1, c_2): distance(c_1, c_2)         # (capital_1, capital_2) |--> REAL NUMBERS
@@ -102,8 +108,8 @@ points = []
 for city in tour:
     points.append(coordinates[city])
 
-folium.PolyLine(points, color="blue", weight=2.5, opacity=0.35).add_to(map)
-folium.PolyLine([points[0], points[len(points)-1]], color="blue", weight=2.5, opacity=0.35).add_to(map)
+folium.PolyLine(points, color="blue", weight=5.5, opacity=0.35).add_to(map)
+folium.PolyLine([points[0], points[len(points)-1]], color="blue", weight=5.5, opacity=0.35).add_to(map)
 
 
 
@@ -118,7 +124,7 @@ for each in points:
     )
     map.add_child(folium.CircleMarker(location=each,
                                       fill='true',
-                                      radius = 7.5,
+                                      radius=7.5,
                                       popup=popup_text,
                                       fill_color='red',
                                       color = 'clear',
