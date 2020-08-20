@@ -3,9 +3,9 @@ import gurobipy as guro
 from gurobipy import GRB
 import json
 import folium
+from folium import plugins
 from itertools import combinations, product
 import webbrowser
-import map
 
 
 
@@ -107,15 +107,21 @@ for (i, j) in combo:
 points = []
 for city in tour:
     points.append(coordinates[city])
+points.append(points[0])
 
-folium.PolyLine(points, color="blue", weight=5.5, opacity=0.35).add_to(map)
-folium.PolyLine([points[0], points[len(points)-1]], color="blue", weight=5.5, opacity=0.35).add_to(map)
+#folium.PolyLine(points, color="blue", weight=5.5, opacity=0.35).add_to(map)
+#folium.PolyLine([points[0], points[len(points)-1]], color="blue", weight=5.5, opacity=0.35).add_to(map)
+ant_path = plugins.AntPath(points, tooltip='hello',
+                                   color='#FF0004',
+                                   pulse_color='#FFFFFF',
+                                   dash_array=[11, 15],
+                                   delay=480)
 
-
+ant_path.add_to(map)
 
 
 count = 0
-for each in points:
+for each in points[0: len(points)-1]:
     popup_text = "{}<br> Latitude: {:,}<br> Longitude: {:,}"
     popup_text = popup_text.format(
         tour[count],

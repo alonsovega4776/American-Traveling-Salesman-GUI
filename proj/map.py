@@ -2,6 +2,7 @@ from flask import Flask, render_template, request
 from jinja2 import Template
 import folium
 from folium.plugins import Draw
+from folium import plugins
 import webbrowser
 import numpy as np
 from itertools import combinations, product
@@ -42,6 +43,15 @@ folium_map = folium.Map(location=detroit, zoom_start=8)
 draw = Draw()
 draw.add_to(folium_map)
 
+fmtr = "function(num) {return L.Util.formatNum(num, 3) + ' deg ';};"
+mouse = plugins.MousePosition(position='topright',
+                              separator=' ',
+                              num_digits=10,
+                              prefix="Current Location:",
+                              lat_formatter=fmtr, lng_formatter=fmtr)
+mouse.add_to(folium_map)
+
+
 @app.route('/')
 def index():
     folium_map.add_child(PopUp())
@@ -63,9 +73,10 @@ def get_coord():
 
 
     folium_map.add_child(folium.CircleMarker(location=coordinates[locations[len(locations)-1]],
-                                             color='blue',
-                                             radius=8,
+                                             color='crimson',
+                                             radius=5,
                                              fill='true',
+                                             fill_color='black',
                                              tooltip=locations[len(locations)-1]))
 
     message = {"lat": lat, "long": long}
@@ -156,14 +167,21 @@ assert len(tour) == len(locations)
 points = []
 for city in tour:
     points.append(coordinates[city])
+points.append(points[0])
 
-folium.PolyLine(points, color="red", weight=4.5, opacity=0.80).add_to(folium_map)
-folium.PolyLine([points[0], points[len(points)-1]], color="red", weight=4.5, opacity=0.80).add_to(folium_map)
+ant_path = plugins.AntPath(points, tooltip='hello',
+                                   color='white',
+                                   pulse_color='crimson',
+                                   dash_array=[11, 15],
+                                   delay=800,
+                                   weight=4)
+
+ant_path.add_to(folium_map)
 
 # Every Possible Path
 combo = [(i, j) for (i, j) in product(locations, locations) if i != j]
 for (i, j) in combo:
-    folium.PolyLine([coordinates[i], coordinates[j]], color='black', weight=1.0, opacity=0.175).add_to(folium_map)
+    folium.PolyLine([coordinates[i], coordinates[j]], color='black', weight=3.0, opacity=0.175).add_to(folium_map)
 
 
 # --------------------------------------------auto_open-----------------------------------------------------------------
@@ -176,6 +194,8 @@ def auto_open(path, f_map):
 
 
 auto_open('/Users/xXxMrMayhemxXx/Desktop/map.html', folium_map)
+
+print('ENDDDDDD')
 
 
 
