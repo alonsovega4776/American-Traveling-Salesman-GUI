@@ -73,7 +73,7 @@ def get_coord():
 
 
     folium_map.add_child(folium.CircleMarker(location=coordinates[locations[len(locations)-1]],
-                                             color='crimson',
+                                             color='blue',
                                              radius=5,
                                              fill='true',
                                              fill_color='black',
@@ -196,31 +196,5 @@ def auto_open(path, f_map):
 auto_open('/Users/xXxMrMayhemxXx/Desktop/map.html', folium_map)
 
 print('ENDDDDDD')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
